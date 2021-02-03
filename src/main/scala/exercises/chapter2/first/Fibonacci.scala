@@ -1,4 +1,4 @@
-package exercises.twoPointOne
+package exercises.chapter2.first
 
 object Fibonacci extends App {
 
