@@ -1,4 +1,4 @@
-package exercises.twoPointTwo
+package exercises.chapter2.second
 
 import scala.annotation.tailrec
 
