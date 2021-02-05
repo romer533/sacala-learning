@@ -9,4 +9,6 @@ object SetHead extends App {
 //    case Nil => ???
   }
 
+  println(setHead(MyList(1, 2, 3, 4)))
+
 }

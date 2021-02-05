@@ -9,4 +9,6 @@ object Tail extends App {
 //    case Nil => ???
   }
 
+  println(tail(MyList(1, 2, 3)))
+
 }
