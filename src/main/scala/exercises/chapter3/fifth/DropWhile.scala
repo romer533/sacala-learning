@@ -9,10 +9,10 @@ object DropWhile extends App {
   @tailrec
   def dropWhile[A](l: MyList[A], f: A => Boolean): MyList[A] = l match {
     case Cons(h, t) =>
-      if (f(h)) l
-      else dropWhile(t, f)
+      if (f(h)) dropWhile(t, f)
+      else l
   }
 
-  println(dropWhile(MyList(1, 2, 3, 4), (f: Int) => f > 2))
+  println(dropWhile(MyList(1, 2, 3, 4), (f: Int) => f < 3))
 
 }
