@@ -15,7 +15,7 @@ object HasSubsequence extends App {
     case (Cons(h1, t1), Cons(h2, t2)) => if (h1 == h2) true else hasSubsequence(t1, t2)
   }
 
-  println(hasSubsequence(MyList(1, 2, 3, 4, 5), MyList(6, 7, 1, 2)))
+  println(hasSubsequence(MyList(1, 2, 3, 4, 5), MyList(6, 7, 1, 2, 5)))
   println(hasSubsequence(MyList(1, 2, 3, 4, 5), MyList(4, 5)))
 
 }
