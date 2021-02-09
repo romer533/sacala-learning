@@ -33,10 +33,17 @@ object Tree extends App {
     case Branch(left, right) => g(fold(left)(f)(g), fold(right)(f)(g))
   }
 
-  def foldSize(tree: Tree[_]): Int = fold(tree)(_ => 1)((left, right) => left + right + 1)
-  def foldMaximum(tree: Tree[Int]): Int = fold(tree)(identity)(_ max _)
-  def foldDepth(tree: Tree[_]): Int = fold(tree)(_ => 1)((left, right) => (left max right) + 1)
-  def foldMap[A, B](tree: Tree[A])(f: A => B): Tree[B] = fold(tree)(left => Leaf(f(left)): Tree[B])((left, right) => Branch(left, right))
+  def foldSize(tree: Tree[_]): Int =
+    fold(tree)(_ => 1)((left, right) => left + right + 1)
+
+  def foldMaximum(tree: Tree[Int]): Int =
+    fold(tree)(identity)(_ max _)
+
+  def foldDepth(tree: Tree[_]): Int =
+    fold(tree)(_ => 1)((left, right) => (left max right) + 1)
+
+  def foldMap[A, B](tree: Tree[A])(f: A => B): Tree[B] = 
+    fold(tree)(left => Leaf(f(left)): Tree[B])((left, right) => Branch(left, right))
 
   println(depth(Branch(Leaf(5), Branch(Leaf(2), Leaf(4)))))
 
