@@ -1,6 +1,6 @@
 package main.scala.exercises.chapter5
 
-import main.scala.exercises.chapter5.Stream.{cons, empty}
+import main.scala.exercises.chapter5.Stream.{cons, empty, unfold}
 
 sealed trait Stream[+A] {
 
@@ -20,15 +20,15 @@ sealed trait Stream[+A] {
     case _ => this
   }
 
-//  def takeWhile(p: A => Boolean): Stream[A] = this match {
-//    case Cons(h, t) if p(h()) => cons(h(), t().takeWhile(p))
-//    case _ => empty
-//  }
+  //  def takeWhile(p: A => Boolean): Stream[A] = this match {
+  //    case Cons(h, t) if p(h()) => cons(h(), t().takeWhile(p))
+  //    case _ => empty
+  //  }
 
-//  def exists(p: A => Boolean): Boolean = this match {
-//    case Cons(h, t) => p(h()) || t().exists(p)
-//    case _ => false
-//  }
+  //  def exists(p: A => Boolean): Boolean = this match {
+  //    case Cons(h, t) => p(h()) || t().exists(p)
+  //    case _ => false
+  //  }
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = this match {
     case Cons(h, t) => f(h(), t().foldRight(z)(f))
@@ -50,8 +50,8 @@ sealed trait Stream[+A] {
 
   def filter(p: A => Boolean): Stream[A] =
     foldRight(empty[A])((h, t) =>
-    if (p(h)) cons(h, t)
-    else t
+      if (p(h)) cons(h, t)
+      else t
     )
 
   def append[B >: A](s: => Stream[B]): Stream[B] =
@@ -62,6 +62,55 @@ sealed trait Stream[+A] {
 
   def find(p: A => Boolean): Option[A] =
     filter(p).headOption
+
+  def map2[B](f: A => B): Stream[B] = unfold(this) {
+    case Cons(h, t) => Some((f(h()), t()))
+    case _ => None
+  }
+
+  def take2(n: Int): Stream[A] = unfold((this, n)) {
+    case (Cons(h, _), 1) => Some((h(), (empty, 0)))
+    case (Cons(h, t), i) if i > 1 => Some((h(), (t(), i - 1)))
+    case _ => None
+  }
+
+  def takeWhile2(p: A => Boolean): Stream[A] = unfold(this) {
+    case Cons(h, t) if p(h()) => Some((h(), t()))
+    case _ => None
+  }
+
+  def zipWith[B, C](s2: Stream[B])(f: (A, B) => C): Stream[C] = unfold((this, s2)) {
+    case (Cons(h1, t1), Cons(h2, t2)) => Some(f(h1(), h2()), (t1(), t2()))
+    case _ => None
+  }
+
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] = unfold((this, s2)) {
+    case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2())), (t1(), t2())))
+    case (Cons(h1, t1), Empty) => Some(((Some(h1()), None), (t1(), empty)))
+    case (Empty, Cons(h2, t2)) => Some(((None, Some(h2())), (empty, t2())))
+    case _ => None
+  }
+
+  def startsWith[A](s: Stream[A]): Boolean =
+    zipAll(s) takeWhile {
+      case (_, b) => b != None
+    } forAll {
+      case (a, b) => a == b
+    }
+
+  def tails: Stream[Stream[A]] = unfold(this) {
+    case s @ Cons(_, t) => Some((s, t()))
+    case Empty => None
+  } append Stream(empty)
+
+  def hasSubsequence[A](s: Stream[A]): Boolean = tails exists(_ startsWith s)
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldRight((z, Stream(z)))((a, b) => {
+      lazy val lb = b
+      val x = f(a, lb._1)
+      (x, cons(x, lb._2))
+    })._2
 
 }
 
