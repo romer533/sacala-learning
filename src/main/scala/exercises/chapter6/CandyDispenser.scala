@@ -1,4 +1,4 @@
-package main.scala.exercises.chapter6
+package exercises.chapter6
 
 import main.scala.exercises.chapter6.State._
 

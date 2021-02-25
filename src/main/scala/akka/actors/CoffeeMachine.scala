@@ -1,43 +1,54 @@
 package akka.actors
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem, Props, Status}
+import akka.pattern.ask
+import akka.util.Timeout
 
-import scala.concurrent.duration.DurationInt
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success}
+
+sealed trait Command
 
 case object Fill
 case object Take
 
+class CoffeeMachine extends Actor {
 
-class Cup extends Actor {
-  def receive = {
-    case Take =>
-      println("Cup tacked")
-      sender() ! Fill
-  }
-}
-
-class CoffeeMachine(cup: ActorRef) extends Actor {
-  var current = 0
-
-  def receive = {
+  import context._
+  def initialized(current: Int): Receive = {
+    case Fill if current < 3 =>
+      sender() ! s"Cup filled || $current"
+      become(initialized(current + 1))
     case Fill =>
-      if (current < 3) {
-        current += 1
-        println(s"Cup filled $current")
-      } else {
-        current -= 1
-        cup ! Take
-        println(s"Have not places for cups $current")
-      }
+      sender() ! Status.Failure(new IllegalStateException) // s"Have no places for cup || $current
+    case Take =>
+      sender() ! println("Something")
   }
+
+  override def preStart(): Unit = become(initialized(0))
+
+  def receive: Receive = Actor.emptyBehavior
+
 }
 
 object Main extends App {
   val system = ActorSystem("coffee")
 
-  val cup = system.actorOf(Props[Cup](), "cup")
+  val coffeeMachine = system.actorOf(Props[CoffeeMachine])
 
-  val coffeeMachine = system.actorOf(Props(classOf[CoffeeMachine], cup), "coffeeMachine")
+  implicit val timeout: Timeout = Timeout(10, TimeUnit.DAYS)
 
-  for (_ <- 0 to 10) coffeeMachine ! Fill
+  import system.dispatcher
+
+  coffeeMachine ! Fill
+  coffeeMachine ! Fill
+  coffeeMachine ! Fill
+  (coffeeMachine ? Fill).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => println(value)
+  }
+  coffeeMachine ! Fill
+  coffeeMachine ! Fill
+  coffeeMachine ! Take
 }
