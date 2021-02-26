@@ -5,7 +5,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 
 sealed trait Command
@@ -23,6 +22,7 @@ class CoffeeMachine extends Actor {
     case Fill =>
       sender() ! Status.Failure(new IllegalStateException) // s"Have no places for cup || $current
     case Take =>
+      become(initialized(current - 1))
       sender() ! println("Something")
   }
 
@@ -41,14 +41,40 @@ object Main extends App {
 
   import system.dispatcher
 
-  coffeeMachine ! Fill
-  coffeeMachine ! Fill
-  coffeeMachine ! Fill
-  (coffeeMachine ? Fill).onComplete {
+
+
+
+
+//  coffeeMachine ! Fill
+
+
+//  (coffeeMachine ? Fill).mapTo[String]
+//    .flatMap { s =>
+//      (coffeeMachine ? Fill).mapTo[String].flatMap { s2 =>
+//        (coffeeMachine ? Fill).mapTo[String].map { s3 =>
+//            List(s, s2, s3)
+//        }
+//      }
+//    }
+
+  (for {
+    s <- (coffeeMachine ? Fill).mapTo[String]
+    s2 <- (coffeeMachine ? Fill).mapTo[String]
+    s3 <- (coffeeMachine ? Fill).mapTo[String]
+  } yield List(s, s2, s3)).onComplete {
     case Failure(exception) => exception.printStackTrace()
     case Success(value) => println(value)
   }
-  coffeeMachine ! Fill
-  coffeeMachine ! Fill
-  coffeeMachine ! Take
+
+  // persistens akka
+
+
+
+//  (coffeeMachine ? Fill).onComplete {
+//    case Failure(exception) => exception.printStackTrace()
+//    case Success(value) => println(value)
+//  }
+//  coffeeMachine ! Fill
+//  coffeeMachine ! Fill
+//  coffeeMachine ! Take
 }
