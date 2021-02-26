@@ -5,6 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import java.util.concurrent.TimeUnit
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 sealed trait Command
@@ -58,19 +59,29 @@ object Main extends App {
 //    }
 
   (for {
-    s <- (coffeeMachine ? Fill).mapTo[String]
-    s2 <- (coffeeMachine ? Fill).mapTo[String]
-    s3 <- (coffeeMachine ? Fill).mapTo[String]
-  } yield List(s, s2, s3)).onComplete {
-    case Failure(exception) => exception.printStackTrace()
-    case Success(value) => println(value)
+    s <- (coffeeMachine ? Fill).mapTo[Int]
+    s2 <- (coffeeMachine ? Fill).mapTo[Int]
+    s3 <- (coffeeMachine ? Fill).mapTo[Int]
+  } yield Seq(s, s2, s3))
+
+  def mySeq(data: Seq[Future[Int]]): Future[Seq[Int]] = {
+    val empty: Future[Seq[Int]] = Future.successful(Seq.empty)
+    data.foldLeft(empty)((acc, el) => el.flatMap {
+      value =>
+        acc.map {
+          list =>
+            value +: list
+        }
+    })
   }
 
-  // persistens akka
+  def batchedFutures(l: List[Int], batchSize: Int, f: Int => Future[Int]): Future[Seq[Int]] = {
+    val empty: Future[List[Int]] = Future.successful(List.empty)
+    val groupedList: List[List[Int]] = l.grouped(batchSize).toList
+    groupedList.foldLeft(empty)((acc, el) => mySeq(el.map(f)).flatMap(s => acc.map(s ++: _)))
+  }
 
-
-
-//  (coffeeMachine ? Fill).onComplete {
+  //  (coffeeMachine ? Fill).onComplete {
 //    case Failure(exception) => exception.printStackTrace()
 //    case Success(value) => println(value)
 //  }

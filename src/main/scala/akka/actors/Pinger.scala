@@ -41,7 +41,7 @@ object Main2 extends App {
   val ponger = system.actorOf(Props(classOf[Ponger], pinger), "ponger")
 
   import system.dispatcher
-  system.scheduler.scheduleOnce(500 millis) {
-    ponger ! Ping
-  }
+//  system.scheduler.scheduleOnce(500 millis) {
+//    ponger ! Ping
+//  }
 }
