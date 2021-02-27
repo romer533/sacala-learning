@@ -33,7 +33,7 @@ class CoffeeMachine extends Actor {
 
 }
 
-object Main extends App {
+object CoffeeMachineMain extends App {
   val system = ActorSystem("coffee")
 
   val coffeeMachine = system.actorOf(Props[CoffeeMachine])

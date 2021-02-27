@@ -36,8 +36,12 @@ class Cinema extends PersistentActor {
 
   override def preStart(): Unit = become(initialized)
 
-  def receive: Receive = Actor.emptyBehavior
+//  def receive: Receive = Actor.emptyBehavior
+  override def receiveRecover: Receive = ???
 
+  override def receiveCommand: Receive = ???
+
+  override def persistenceId: String = ???
 }
 
 object Main extends App {
