@@ -1,4 +1,4 @@
-package main.scala.exercises.chapter6
+package exercises.chapter6
 
 import main.scala.exercises.chapter6.State._
 
@@ -15,9 +15,9 @@ case class Machine(locked: Boolean, candies: Int, coins: Int) {
   }
 }
 
-object CandyDispenser {
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = for {
-    _ <- sequence(inputs.map(input => modify[Machine](_.checkRules(input))))
-    machine <- get
-  } yield (machine.candies, machine.coins)
-}
+//object CandyDispenser {
+//  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = for {
+//    _ <- sequence(inputs.map(input => modify[Machine](_.checkRules(input))))
+//    machine <- get
+//  } yield (machine.candies, machine.coins)
+//}
