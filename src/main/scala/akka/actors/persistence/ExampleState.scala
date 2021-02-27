@@ -28,7 +28,7 @@ class ExamplePersistentActor extends PersistentActor {
     case SnapshotOffer(_, snapshot: ExampleState) => state = snapshot
   }
 
-  val snapShotInterval = 1000
+  val snapShotInterval = 10
   val receiveCommand: Receive = {
     case Cmd(data) =>
       println(s"Something message - start $data")
